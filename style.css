@@ -1,11 +1,10 @@
 /* Grundstil */
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden; /* Ta bort scrollbars */
+  overflow: hidden;
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   background-color: #f8f9fa;
 }
@@ -21,16 +20,7 @@ body {
   align-items: center;
   justify-content: center;
   background: url('https://source.unsplash.com/1600x900/?earth,world,map') no-repeat center center/cover;
-  z-index: 1000; /* Lägg startskärmen över allt */
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: url('https://source.unsplash.com/1600x900/?earth,world,map') no-repeat center center/cover;
+  z-index: 1000;
 }
 .hero-overlay {
   position: absolute;
@@ -48,17 +38,8 @@ body {
   padding: 2rem;
   max-width: 600px;
   animation: fadeInUp 1s ease-out both;
-  z-index: 10;
-}
-.hero-content h1 {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-}
-.tagline {
-  font-size: 1.25rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
+  z-index: 1001;
+  pointer-events: auto;
 }
 .btn-hero {
   background: linear-gradient(45deg, #ff7e5f, #feb47b);
@@ -70,6 +51,7 @@ body {
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  pointer-events: auto;
 }
 .btn-hero:hover {
   transform: translateY(-3px) scale(1.02);
@@ -96,7 +78,7 @@ body {
 }
 #streetMap,
 #guessMap {
-  flex: 0 0 50%;  /* varsin hel karta */
+  flex: 0 0 50%;
   height: 100%;
   min-width: 200px;
 }
@@ -112,7 +94,7 @@ body {
   justify-content: space-around;
   padding: 0.5rem;
   font-weight: bold;
-  z-index: 5;
+  z-index: 10;
 }
 #messageBox {
   position: absolute;
@@ -126,14 +108,14 @@ body {
   display: none;
   max-width: 80%;
   text-align: center;
-  z-index: 5;
+  z-index: 10;
 }
 
 /* Svårighetsval */
 .difficulty-select {
   margin-bottom: 1rem;
   color: #fff;
-  z-index: 5;
+  z-index: 10;
 }
 .difficulty-select label {
   margin-right: 0.5rem;
@@ -144,4 +126,5 @@ body {
   border: none;
   background: white;
   color: #333;
+  pointer-events: auto;
 }
