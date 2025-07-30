@@ -4,6 +4,7 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden; /* Ta bort scrollbars på hela sidan */
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   background-color: #f8f9fa;
 }
@@ -86,6 +87,7 @@ body {
 #streetMap,
 #guessMap {
   flex: 1;
+  height: 100%;
 }
 
 /* Score- och meddelanderuta */
