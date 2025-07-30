@@ -4,43 +4,60 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mini GeoGuessr</title>
-    <!-- Leaflet styles and script via CDN -->
-    <!-- Leaflet styles and script via CDN (SRI removed to avoid digest mismatch) -->
+    <!-- Google Fonts -->
     <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap"
       rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
-    <script
-      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    ></script>
     <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
   <body>
-    <div id="gameContainer">
-      <!-- Start screen overlay -->
-      <div id="startScreen">
-        <h1>Välkommen till Mini‑GeoGuessr!</h1>
-        <p>
-          Klicka på knappen nedan för att starta spelet. Du kommer placeras
-          någonstans på kartan och ska gissa var du befinner dig.
+    <!-- Inspirerande startsida -->
+    <div id="startScreen" class="hero">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1>Välkommen till Mini GeoGuessr!</h1>
+        <p class="tagline">
+          Utforska världen, gissa platsen och utmana dig själv – allt i din
+          webbläsare.
         </p>
-        <button id="startButton">Starta spelet</button>
-      </div>
-
-      <!-- Score bar at top; hidden by default -->
-      <div id="scoreBar" style="display: none;">
-        <div id="roundInfo">Runda: 0/0</div>
-        <div id="scoreInfo">Poäng: 0</div>
-        <div id="highScoreInfo">Högsta poäng: 0</div>
-      </div>
-      <!-- Message box -->
-      <div id="messageBox"></div>
-      <!-- Maps container -->
-      <div id="mapsWrapper">
-        <div id="streetMap"></div>
-        <div id="guessMap"></div>
+        <button id="startButton" class="btn-hero">Starta äventyret</button>
       </div>
     </div>
+
+    <!-- Scoreboard och topplistor -->
+    <div id="scoreBar" style="display: none;">
+      <div id="roundInfo">Runda: 0/0</div>
+      <div id="scoreInfo">Poäng: 0</div>
+      <div id="highScoreInfo">Högsta poäng: 0</div>
+    </div>
+
+    <!-- Historik (senaste resultat) -->
+    <div id="historyContainer" style="display: none;">
+      <h2>Senaste resultat</h2>
+      <ol id="historyList"></ol>
+    </div>
+
+    <!-- Topplista: högsta poäng -->
+    <div id="highScoresContainer" style="display: none;">
+      <h2>Topp 10 högsta poäng</h2>
+      <ol id="highScoresList"></ol>
+    </div>
+
+    <!-- Topplista: bästa gissningar -->
+    <div id="bestGuessesContainer" style="display: none;">
+      <h2>Topp 10 bästa gissningar (minsta avstånd)</h2>
+      <ol id="bestGuessesList"></ol>
+    </div>
+
+    <!-- Spelyta -->
+    <div id="gameContainer">
+      <div id="streetMap"></div>
+      <div id="guessMap"></div>
+    </div>
+
+    <div id="messageBox"></div>
     <script src="script.js"></script>
   </body>
 </html>
