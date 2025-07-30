@@ -94,9 +94,7 @@
     function initMap(){
       const opts={scrollWheelZoom:false,doubleClickZoom:false,minZoom:2,maxZoom:12};
       map=L.map('map',opts).setView([59.3293,18.0686],5);
-      L.tileLayer('https://{s}.tile.openstreetmap.se/{z}/{x}/{y}.png',{
-        attribution:'© OpenStreetMap contributors'
-      }).addTo(map);
+     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
       map.on('click',e=>{if(!guessMarker)makeGuess(e.latlng);});
     }
 
