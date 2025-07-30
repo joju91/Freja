@@ -9,19 +9,34 @@
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap"
       rel="stylesheet"
     />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Main stylesheet -->
     <link rel="stylesheet" href="style.css" />
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
   <body>
-    <!-- Inspirerande startsida -->
+    <!-- Inspirerande startskärm -->
     <div id="startScreen" class="hero">
       <div class="hero-overlay"></div>
       <div class="hero-content">
         <h1>Välkommen till Mini GeoGuessr!</h1>
         <p class="tagline">
-          Utforska världen, gissa platsen och utmana dig själv – allt i din
-          webbläsare.
+          Utforska världen, gissa platsen och utmana dig själv – allt i din webbläsare.
         </p>
+        <!-- Svårighetsval -->
+        <div class="difficulty-select">
+          <label for="difficulty">Svårighetsnivå:</label>
+          <select id="difficulty">
+            <option value="easy">Lätt (stora städer)</option>
+            <option value="medium" selected>Medel (blandade städer)</option>
+            <option value="hard">Svår (helt slumpat)</option>
+          </select>
+          <p id="difficultyDescription" class="difficulty-desc">
+            Medel: Blandning av stora städer och helt slumpade platser – lagom utmaning.
+          </p>
+        </div>
         <button id="startButton" class="btn-hero">Starta äventyret</button>
       </div>
     </div>
@@ -57,7 +72,10 @@
       <div id="guessMap"></div>
     </div>
 
+    <!-- Meddelanderuta -->
     <div id="messageBox"></div>
+
+    <!-- Spelskript -->
     <script src="script.js"></script>
   </body>
 </html>
