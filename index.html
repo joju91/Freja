@@ -1,94 +1,114 @@
-<!DOCTYPE html>
-<html lang="sv">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini GeoGuessr</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        /* Din CSS från tidigare (förkortad här för utrymme) */
-        /* ... [samma CSS som du hade tidigare] ... */
-
-        .game-container {
-            display: none;
-            width: 100%;
-            height: 100vh;
-        }
-    </style>
-</head>
-<body>
-    <!-- Startskärm -->
-    <div id="startScreen" class="start-screen">
-        <div class="globe-container">
-            <div class="globe">
-                <div class="continents"></div>
-            </div>
-        </div>
-
-        <div class="start-content">
-            <h1>Mini GeoGuessr</h1>
-            <p>Utforska världen, gissa platsen och utmana dig själv!</p>
-
-            <div class="difficulty-section">
-                <label for="difficulty">Svårighetsgrad:</label>
-                <select id="difficulty">
-                    <option value="easy">Lätt</option>
-                    <option value="medium">Medel</option>
-                    <option value="hard">Svår</option>
-                </select>
-                <div class="difficulty-description" id="difficultyDesc">Välj svårighetsgrad ovan</div>
-            </div>
-
-            <button class="start-button" onclick="startGame()">Starta Spelet</button>
-        </div>
-    </div>
-
-    <!-- Spelyta -->
-    <div id="gameContainer" class="game-container">
-        <div class="score-bar">
-            <span>Poäng: 0</span>
-            <span>Runda: 1</span>
-        </div>
-        <div class="game-layout">
-            <div class="map-container" id="streetMap"></div>
-        </div>
-    </div>
-
-    <!-- Enkel spel-start logik -->
-    <script>
-        const difficultySelect = document.getElementById("difficulty");
-        const difficultyDesc = document.getElementById("difficultyDesc");
-
-        difficultySelect.addEventListener("change", function() {
-            const value = difficultySelect.value;
-            if (value === "easy") {
-                difficultyDesc.textContent = "Lätt nivå: gissa välkända platser";
-            } else if (value === "medium") {
-                difficultyDesc.textContent = "Medel nivå: lite mer utmaning";
-            } else if (value === "hard") {
-                difficultyDesc.textContent = "Svår nivå: för geo-proffs!";
-            } else {
-                difficultyDesc.textContent = "Välj svårighetsgrad ovan";
-            }
-        });
-
-        function startGame() {
-            document.getElementById("startScreen").style.display = "none";
-            document.getElementById("gameContainer").style.display = "block";
-
-            // Starta Leaflet-kartan
-            const map = L.map('streetMap').setView([59.3293, 18.0686], 13); // Stockholm
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-
-            // Lägg till en platsmarkör (för exempel)
-            L.marker([59.3293, 18.0686]).addTo(map)
-                .bindPopup("Startpunkt i Stockholm!")
-                .openPopup();
-        }
-    </script>
-</body>
-</html>
+diff --git a/index.html b/index.html
+index 40878e296c89cf72d47769040d3975f66fb50957..c6cf75c48afcf00f40c3f236a0c2bc61a0bdd8a0 100644
+--- a/index.html
++++ b/index.html
+@@ -1,94 +1,57 @@
+ <!DOCTYPE html>
+ <html lang="sv">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Mini GeoGuessr</title>
+     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+-    <style>
+-        /* Din CSS från tidigare (förkortad här för utrymme) */
+-        /* ... [samma CSS som du hade tidigare] ... */
+-
+-        .game-container {
+-            display: none;
+-            width: 100%;
+-            height: 100vh;
+-        }
+-    </style>
++    <link rel="stylesheet" href="style.css" />
+ </head>
+ <body>
+     <!-- Startskärm -->
+     <div id="startScreen" class="start-screen">
+         <div class="globe-container">
+             <div class="globe">
+                 <div class="continents"></div>
+             </div>
+         </div>
+ 
+         <div class="start-content">
+             <h1>Mini GeoGuessr</h1>
+             <p>Utforska världen, gissa platsen och utmana dig själv!</p>
+ 
+             <div class="difficulty-section">
+                 <label for="difficulty">Svårighetsgrad:</label>
+                 <select id="difficulty">
+                     <option value="easy">Lätt</option>
+                     <option value="medium">Medel</option>
+                     <option value="hard">Svår</option>
+                 </select>
+                 <div class="difficulty-description" id="difficultyDesc">Välj svårighetsgrad ovan</div>
+             </div>
+ 
+-            <button class="start-button" onclick="startGame()">Starta Spelet</button>
++            <button id="startButton" class="start-button">Starta Spelet</button>
+         </div>
+     </div>
+ 
+-    <!-- Spelyta -->
+-    <div id="gameContainer" class="game-container">
+-        <div class="score-bar">
+-            <span>Poäng: 0</span>
+-            <span>Runda: 1</span>
+-        </div>
+-        <div class="game-layout">
+-            <div class="map-container" id="streetMap"></div>
+-        </div>
++    <!-- Poänginformation -->
++    <div id="scoreBar" style="display: none;">
++        <div id="roundInfo">Runda: 0/5</div>
++        <div id="scoreInfo">Poäng: 0</div>
++        <div id="highScoreInfo">Högsta poäng: 0</div>
+     </div>
+ 
+-    <!-- Enkel spel-start logik -->
+-    <script>
+-        const difficultySelect = document.getElementById("difficulty");
+-        const difficultyDesc = document.getElementById("difficultyDesc");
+-
+-        difficultySelect.addEventListener("change", function() {
+-            const value = difficultySelect.value;
+-            if (value === "easy") {
+-                difficultyDesc.textContent = "Lätt nivå: gissa välkända platser";
+-            } else if (value === "medium") {
+-                difficultyDesc.textContent = "Medel nivå: lite mer utmaning";
+-            } else if (value === "hard") {
+-                difficultyDesc.textContent = "Svår nivå: för geo-proffs!";
+-            } else {
+-                difficultyDesc.textContent = "Välj svårighetsgrad ovan";
+-            }
+-        });
+-
+-        function startGame() {
+-            document.getElementById("startScreen").style.display = "none";
+-            document.getElementById("gameContainer").style.display = "block";
++    <!-- Spelyta -->
++    <div id="gameContainer" style="display: none;">
++        <div id="streetMap" style="height: 400px; margin-bottom: 15px;"></div>
++        <div id="guessMap" style="height: 250px;"></div>
++        <button id="guessButton" class="btn-game">Gissa Plats</button>
++    </div>
+ 
+-            // Starta Leaflet-kartan
+-            const map = L.map('streetMap').setView([59.3293, 18.0686], 13); // Stockholm
+-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+-                attribution: '&copy; OpenStreetMap contributors'
+-            }).addTo(map);
++    <div id="messageBox"></div>
+ 
+-            // Lägg till en platsmarkör (för exempel)
+-            L.marker([59.3293, 18.0686]).addTo(map)
+-                .bindPopup("Startpunkt i Stockholm!")
+-                .openPopup();
+-        }
+-    </script>
++    <script src="script.js"></script>
+ </body>
+ </html>
