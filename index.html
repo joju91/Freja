@@ -79,11 +79,14 @@
 
     startButton.onclick=startGame;
     
-    function startGame(){
+    function startGame() {
       TOTAL_ROUNDS=parseInt(roundsInput.value)||5;
       startScreen.style.display='none';
       gameContainer.style.display='block';
       initMap();
+      // Säkerställ Leaflet-rendering efter visning
+      setTimeout(() => map.invalidateSize(), 100);
+      nextRound();
       nextRound();
     }
     
