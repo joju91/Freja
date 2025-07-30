@@ -107,6 +107,8 @@
       const pool = CITIES.filter(c => regionSelect.value === 'all' || c.region === regionSelect.value);
       currentLocation = pool[Math.floor(Math.random() * pool.length)];
       map.setView([currentLocation.lat, currentLocation.lon], 8);
+      // Visa prompt för aktuell plats
+      showMessage(`Var är ${currentLocation.name}?`, false);
       startTimer(30);
     }
 
