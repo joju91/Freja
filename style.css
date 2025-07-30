@@ -1,173 +1,41 @@
-/* Grundstil */
-html, body {
+body {
+  font-family: 'Montserrat', Arial, sans-serif;
+  background: #eaf5f9;
   margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-  background-color: #f8f9fa;
 }
 
-/* Hero / startskärm */
-/* Hero / startskärm */
-/* Hero / startskärm */
 .hero {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: url('https://source.unsplash.com/1600x900/?earth,world,map') no-repeat center center/cover;
-  z-index: 1000;
-  pointer-events: none; /* Låt klick passera genom hero */
-}
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  pointer-events: none;
-}
-.hero-content {
-  position: relative;
+  padding: 100px 0;
   text-align: center;
+  background: linear-gradient(120deg,#01689b 50%, #22b0a5 100%);
   color: #fff;
-  padding: 2rem;
-  max-width: 600px;
-  animation: fadeInUp 1s ease-out both;
-  z-index: 1001;
-  pointer-events: auto; /* Tillåt klick på innehållet */
-}
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  /* behåll inga pekhändelser */
-  pointer-events: none;
-}
-.hero-content {
-  position: relative;
-  text-align: center;
-  color: #fff;
-  padding: 2rem;
-  max-width: 600px;
-  animation: fadeInUp 1s ease-out both;
-  z-index: 1001;
-  pointer-events: auto; /* Tillåt klick här */
 }
 
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  pointer-events: none;
-}
-.hero-content {
-  position: relative;
-  text-align: center;
-  color: #fff;
-  padding: 2rem;
-  max-width: 600px;
-  animation: fadeInUp 1s ease-out both;
-  z-index: 1001;
-  pointer-events: auto;
-}
-.btn-hero {
-  background: linear-gradient(45deg, #ff7e5f, #feb47b);
+.btn-hero,.btn-game {
   border: none;
-  padding: 0.75rem 2rem;
+  background: #fff;
+  color: #228795;
+  font-weight: 700;
+  padding: 12px 36px;
+  border-radius: 24px;
   font-size: 1.1rem;
-  color: #fff;
-  border-radius: 50px;
+  margin-top: 25px;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  pointer-events: auto;
-}
-.btn-hero:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Fade in animation */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Spelyta */
 #gameContainer {
-  display: flex;
-  width: 100%;
-  height: 100%;
-}
-#streetMap,
-#guessMap {
-  flex: 0 0 50%;
-  height: 100%;
-  min-width: 200px;
-}
-
-/* Score- och meddelanderuta */
-#scoreBar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.85);
-  display: flex;
-  justify-content: space-around;
-  padding: 0.5rem;
-  font-weight: bold;
-  z-index: 10;
-}
-#messageBox {
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: white;
-  padding: 1rem 1.5rem;
+  max-width: 800px;
+  margin: 2em auto;
+  background: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  display: none;
-  max-width: 80%;
-  text-align: center;
-  z-index: 10;
+  padding: 1em;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
 }
 
-/* Svårighetsval */
-.difficulty-select {
-  margin-bottom: 1rem;
-  color: #fff;
-  z-index: 10;
-}
-.difficulty-select label {
-  margin-right: 0.5rem;
-}
-.difficulty-select select {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  border: none;
-  background: white;
-  color: #333;
-  pointer-events: auto;
+#messageBox {
+  margin: 1rem auto;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #01689b;
 }
