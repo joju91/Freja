@@ -1,12 +1,20 @@
 /* Grundstil */
 html,
 body {
-  height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Ta bort scrollbars på hela sidan */
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* Ta bort scrollbars */
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   background-color: #f8f9fa;
+}
+
+/* Container för kartor */
+#gameContainer {
+  display: flex;
+  width: 100%;
+  height: 100%;
 }
 
 /* Hero / startskärm */
@@ -15,7 +23,7 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,17 +84,18 @@ body {
   }
 }
 
-/* Spelyta */
-#gameContainer {
-  display: flex;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  z-index: 1; /* bakom hero tills spelet startar */
-}
+/* Kartorna */
 #streetMap,
 #guessMap {
-  flex: 1;
+  flex: 0 0 50%;  /* varsin hel karta i 50% bredd */
+  height: 100%;
+  min-width: 200px; /* säkerställer läsbarhet på små skärmar */
+}
+
+#gameContainer {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
   height: 100%;
 }
 
@@ -101,6 +110,7 @@ body {
   justify-content: space-around;
   padding: 0.5rem;
   font-weight: bold;
+  z-index: 2;
 }
 #messageBox {
   position: absolute;
@@ -114,12 +124,14 @@ body {
   display: none;
   max-width: 80%;
   text-align: center;
+  z-index: 2;
 }
 
 /* Svårighetsval */
 .difficulty-select {
   margin-bottom: 1rem;
   color: #fff;
+  z-index: 3;
 }
 .difficulty-select label {
   margin-right: 0.5rem;
