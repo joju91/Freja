@@ -29,6 +29,57 @@ const LOCATIONS = [
   { name: "Beijing, Kina", lat: 39.9042, lon: 116.4074 },
   { name: "Buenos Aires, Argentina", lat: -34.6037, lon: -58.3816 },
   { name: "Lagos, Nigeria", lat: 6.5244, lon: 3.3792 },
+  // Additional cities to provide more variety and reduce repetition
+  { name: "Mexico City, Mexiko", lat: 19.4326, lon: -99.1332 },
+  { name: "Berlin, Tyskland", lat: 52.52, lon: 13.405 },
+  { name: "Madrid, Spanien", lat: 40.4168, lon: -3.7038 },
+  { name: "Rom, Italien", lat: 41.9028, lon: 12.4964 },
+  { name: "Aten, Grekland", lat: 37.9838, lon: 23.7275 },
+  { name: "Nairobi, Kenya", lat: -1.286389, lon: 36.817223 },
+  { name: "Johannesburg, Sydafrika", lat: -26.2041, lon: 28.0473 },
+  { name: "Vancouver, Kanada", lat: 49.2827, lon: -123.1207 },
+  { name: "Chicago, USA", lat: 41.8781, lon: -87.6298 },
+  { name: "Los Angeles, USA", lat: 34.0522, lon: -118.2437 },
+  { name: "San Francisco, USA", lat: 37.7749, lon: -122.4194 },
+  { name: "Seattle, USA", lat: 47.6062, lon: -122.3321 },
+  { name: "Miami, USA", lat: 25.7617, lon: -80.1918 },
+  { name: "São Paulo, Brasilien", lat: -23.5505, lon: -46.6333 },
+  { name: "Santiago, Chile", lat: -33.4489, lon: -70.6693 },
+  { name: "Lima, Peru", lat: -12.0464, lon: -77.0428 },
+  { name: "Bogotá, Colombia", lat: 4.711, lon: -74.0721 },
+  { name: "Caracas, Venezuela", lat: 10.4806, lon: -66.9036 },
+  { name: "Auckland, Nya Zeeland", lat: -36.8485, lon: 174.7633 },
+  { name: "Dublin, Irland", lat: 53.3498, lon: -6.2603 },
+  { name: "Reykjavik, Island", lat: 64.1466, lon: -21.9426 },
+  { name: "Köpenhamn, Danmark", lat: 55.6761, lon: 12.5683 },
+  { name: "Oslo, Norge", lat: 59.9139, lon: 10.7522 },
+  { name: "Helsingfors, Finland", lat: 60.1699, lon: 24.9384 },
+  { name: "Bryssel, Belgien", lat: 50.8503, lon: 4.3517 },
+  { name: "Amsterdam, Nederländerna", lat: 52.3676, lon: 4.9041 },
+  { name: "Wien, Österrike", lat: 48.2082, lon: 16.3738 },
+  { name: "Prag, Tjeckien", lat: 50.0755, lon: 14.4378 },
+  { name: "Budapest, Ungern", lat: 47.4979, lon: 19.0402 },
+  { name: "Warszawa, Polen", lat: 52.2297, lon: 21.0122 },
+  { name: "Zürich, Schweiz", lat: 47.3769, lon: 8.5417 },
+  { name: "Istanbul, Turkiet", lat: 41.0082, lon: 28.9784 },
+  { name: "Hongkong, Kina", lat: 22.3193, lon: 114.1694 },
+  { name: "Singapore", lat: 1.3521, lon: 103.8198 },
+  { name: "Kuala Lumpur, Malaysia", lat: 3.139, lon: 101.6869 },
+  { name: "Bangkok, Thailand", lat: 13.7563, lon: 100.5018 },
+  { name: "Seoul, Sydkorea", lat: 37.5665, lon: 126.978 },
+  { name: "Manila, Filippinerna", lat: 14.5995, lon: 120.9842 },
+  { name: "Jakarta, Indonesien", lat: -6.2088, lon: 106.8456 },
+  { name: "Taipei, Taiwan", lat: 25.032969, lon: 121.565418 },
+  { name: "Karachi, Pakistan", lat: 24.8607, lon: 67.0011 },
+  { name: "Casablanca, Marocko", lat: 33.5731, lon: -7.5898 },
+  { name: "Marrakech, Marocko", lat: 31.6295, lon: -7.9811 },
+  { name: "Tunis, Tunisien", lat: 36.8065, lon: 10.1815 },
+  { name: "Dakar, Senegal", lat: 14.6928, lon: -17.4467 },
+  { name: "Accra, Ghana", lat: 5.6037, lon: -0.187 },
+  { name: "Alger, Algeriet", lat: 36.7538, lon: 3.0588 },
+  { name: "Dubai, Förenade Arabemiraten", lat: 25.2048, lon: 55.2708 },
+  { name: "Bagdad, Irak", lat: 33.3152, lon: 44.3661 },
+  { name: "Teheran, Iran", lat: 35.6892, lon: 51.389 },
 ];
 
 // Game settings
@@ -40,6 +91,10 @@ let currentLocation = null;
 let score = 0;
 let usedLocations = [];
 let hasGuessed = false;
+
+// High score handling
+const HIGH_SCORE_KEY = "miniGeoGuessrHighScore";
+let highScore = 0;
 
 // Leaflet map instances and markers
 let streetMap, guessMap;
@@ -67,6 +122,26 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+}
+
+// Load high score from localStorage
+function loadHighScore() {
+  const stored = localStorage.getItem(HIGH_SCORE_KEY);
+  if (stored) {
+    const val = parseInt(stored, 10);
+    if (!isNaN(val)) {
+      highScore = val;
+    }
+  }
+  updateHighScoreDisplay();
+}
+
+// Update high score display on the score bar
+function updateHighScoreDisplay() {
+  const highDiv = document.getElementById("highScoreInfo");
+  if (highDiv) {
+    highDiv.textContent = `Högsta poäng: ${highScore}`;
+  }
 }
 
 // Initialize the two maps
@@ -125,6 +200,8 @@ function startGame() {
     });
   }
   scoreBar.style.display = "flex";
+  // Load the stored high score and update display
+  loadHighScore();
   // After toggling visibility of DOM elements, force Leaflet to recalculate
   // map sizes. Without this call the maps may remain blank when the
   // container changes from hidden to visible.
@@ -163,7 +240,10 @@ function nextRound() {
   // Update round info
   roundInfo.textContent = `Runda: ${currentRound}/${TOTAL_ROUNDS}`;
   scoreInfo.textContent = `Poäng: ${score}`;
-  messageBox.style.display = "none";
+  // Show instruction for the new round
+  messageBox.innerHTML =
+    `Runda ${currentRound} av ${TOTAL_ROUNDS}: Utforska området på vänster karta och klicka på gissningskartan till höger när du vill gissa.`;
+  messageBox.style.display = "block";
 
   // Clear any existing markers/lines from previous round
   if (guessMarker) {
@@ -247,6 +327,13 @@ function endGame() {
     "p"
   ).textContent = `Din slutpoäng är ${score} poäng. Vill du spela igen?`;
   startButton.textContent = "Spela igen";
+
+  // Update high score if this run is better
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem(HIGH_SCORE_KEY, String(highScore));
+    updateHighScoreDisplay();
+  }
 }
 
 // Attach event listeners
