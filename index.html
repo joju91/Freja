@@ -1,166 +1,206 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mini GeoGuessr</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Montserrat', sans-serif; }
-    .start-screen { position: fixed; inset: 0; background: linear-gradient(135deg,#667eea,#764ba2); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .start-content { background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 8px; max-width: 400px; text-align: center; color: #fff; }
-    .start-content select, .start-content input[type=number] { width: 100%; margin-bottom: 1rem; padding: 0.5rem; border-radius: 4px; border: none; font-size: 1rem; }
-    .start-button { background: linear-gradient(45deg,#ff6b6b,#ff8e53); border: none; padding: 0.75rem 1rem; color: #fff; border-radius: 25px; cursor: pointer; font-size: 1rem; }
-    #gameContainer { display: none; position: relative; width: 100%; height: 100%; }
-    .score-bar { position: absolute; top: 0; left: 0; right: 0; background: rgba(255,255,255,0.9); display: flex; justify-content: space-around; padding: 0.5rem; z-index: 500; }
-    .timer { font-weight: bold; }
-    #map { width: 100%; height: 100%; cursor: crosshair; }
-    .message-box { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); background: #fff; padding: 0.5rem 1rem; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 600; display: none; }
-    .bounce { animation: bounce 0.5s; }
-    @keyframes bounce { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+    /* Grundinställningar */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Montserrat', sans-serif; height:100vh; overflow:hidden; }
+    /* Startskärm */
+    .start-screen { position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg,#667eea,#764ba2); display:flex; align-items:center; justify-content:center; z-index:1000;}
+    .start-content { position:relative; z-index:10; text-align:center; color:#fff; max-width:500px; padding:2rem;}
+    .start-content h1 { font-size:2.5rem; margin-bottom:1rem; text-shadow:2px2px4px rgba(0,0,0,0.5);}
+    .start-content p { font-size:1.1rem; margin-bottom:2rem; opacity:0.9;}
+    .difficulty-section { margin-bottom:2rem; }
+    .difficulty-section label { display:block; margin-bottom:0.5rem; font-weight:500; }
+    .difficulty-section select { padding:0.5rem 1rem; border:none; border-radius:8px; font-size:1rem; min-width:250px; margin-bottom:1rem; }
+    .difficulty-description { font-size:0.9rem; opacity:0.8; font-style:italic; min-height:40px; }
+    .start-button { background:linear-gradient(45deg,#ff6b6b,#ff8e53); border:none; padding:1rem 2rem; font-size:1.1rem; color:#fff; border-radius:50px; cursor:pointer; font-weight:500; transition:all 0.3s; box-shadow:0 4px 15px rgba(0,0,0,0.2);}
+    .start-button:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.3);}
+    /* Spelyta */
+    #gameContainer { display:none; width:100%; height:100vh; position:relative; }
+    .score-bar { position:fixed; top:0; left:0; right:0; background:rgba(255,255,255,0.95); padding:1rem; display:flex; justify-content:space-between; align-items:center; z-index:500; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+    .game-layout { display:flex; height:100%; margin-top:3.5rem; }
+    .map-container { flex:1; position:relative; }
+    #streetMap, #guessMap { width:100%; height:100%; }
+    .message-box { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%); background:white; padding:1rem 2rem; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.3); display:none; z-index:600; max-width:80%; text-align:center;}
+    .message-box.clickable { cursor:pointer; background:#f0f8ff; border:2px solid #4A90E2;}
+    .message-box.clickable:hover { background:#e6f3ff; }
+    /* Animation */
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(30px);} to { opacity:1; transform:translateY(0);} }
+    .fade-in { animation:fadeInUp 1s ease-out both; }
   </style>
 </head>
 <body>
   <div id="startScreen" class="start-screen">
-    <div class="start-content">
+    <div class="start-content fade-in">
       <h1>Mini GeoGuessr</h1>
-      <select id="regionSelect">
-        <option value="all">Alla regioner</option>
-        <option value="europe">Europa</option>
-        <option value="asia">Asien</option>
-        <option value="america">Amerika</option>
-      </select>
-      <input id="roundsInput" type="number" min="1" max="20" value="5" />
+      <p>Utforska världen, gissa platsen och utmana dig själv!</p>
+      <div class="difficulty-section">
+        <label for="difficulty">Välj svårighetsgrad:</label>
+        <select id="difficulty">
+          <option value="easy">Lätt - Stora städer</option>
+          <option value="medium" selected>Medel - Blandade platser</option>
+          <option value="hard">Svår - Slumpmässiga platser</option>
+        </select>
+        <div id="difficultyDescription" class="difficulty-description"></div>
+      </div>
       <button id="startButton" class="start-button">Starta äventyret</button>
     </div>
   </div>
 
   <div id="gameContainer">
-    <div class="score-bar">
+    <div id="scoreBar" class="score-bar">
       <div id="roundInfo">Runda: 0/0</div>
       <div id="scoreInfo">Poäng: 0</div>
-      <div class="timer" id="timer">Tid: 0s</div>
+      <div id="highScoreInfo">Rekord: 0</div>
     </div>
-    <div id="map"></div>
-    <div id="messageBox" class="message-box"></div>
+    <div class="game-layout">
+      <div class="map-container"><div id="streetMap"></div></div>
+      <div class="map-container"><div id="guessMap"></div></div>
+    </div>
   </div>
+  <div id="messageBox" class="message-box"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const CITIES=[
+    // Konfiguration
+    const CITIES = [
       {name:"Stockholm, Sverige",lat:59.3293,lon:18.0686,region:"europe"},
       {name:"Oslo, Norge",lat:59.9139,lon:10.7522,region:"europe"},
+      {name:"Visby, Sverige",lat:57.6349,lon:18.2948,region:"europe"},
       {name:"Malmö, Sverige",lat:55.6050,lon:13.0038,region:"europe"},
-      {name:"Visby, Sverige",lat:57.6348,lon:18.2948,region:"europe"},
-      {name:"Berlin, Tyskland",lat:52.52,lon:13.4050,region:"europe"},
+      {name:"Berlin, Tyskland",lat:52.5200,lon:13.4050,region:"europe"},
+      {name:"Madrid, Spanien",lat:40.4168,lon:-3.7038,region:"europe"},
+      {name:"Rom, Italien",lat:41.9028,lon:12.4964,region:"europe"},
       {name:"Paris, Frankrike",lat:48.8566,lon:2.3522,region:"europe"},
+      {name:"London, Storbritannien",lat:51.5074,lon:-0.1278,region:"europe"},
       {name:"Aten, Grekland",lat:37.9838,lon:23.7275,region:"europe"},
-      {name:"Tokyo, Japan",lat:35.6762,lon:139.6503,region:"asia"},
-      {name:"Bangkok, Thailand",lat:13.7563,lon:100.5018,region:"asia"},
-      {name:"Singapore",lat:1.3521,lon:103.8198,region:"asia"},
-      {name:"New York, USA",lat:40.7128,lon:-74.0060,region:"america"},
-      {name:"Los Angeles, USA",lat:34.0522,lon:-118.2437,region:"america"},
-      {name:"Vancouver, Kanada",lat:49.2827,lon:-123.1207,region:"america"},
-      {name:"Miami, USA",lat:25.7617,lon:-80.1918,region:"america"}
+      // … fortsätt lägga till fler städer efter behov …
     ];
+    const TOTAL_ROUNDS = 5;
+    const feedbackOptions = {
+      close: ["🎯 Perfekt träff!","🌟 Imponerande nära!","✅ Du prickade in det!","👏 Toppenjobbat!","🏆 Du är en mästare på kartor!","🔥 Otroligt nära!","✨ Nästan oslagbart!","🥇 Du tog guldet!","💥 Fantastisk precision!","🎉 Vilket träffsäkerhet!"],
+      good: ["👍 Bra gissat!","😊 Fin insats!","👍 Du är på rätt spår!","🌈 Bra försök!","👏 Du kommer närmare!","🙂 Bra jobbat!","😎 Ganska nära!","💪 Starkt gjort!","🏅 Du når pallen snart!","😃 Strålande försök!"],
+      meh: ["👌 Inte illa, men lite längre bort!","😉 Du kom ganska nära!","🤔 Nästa gång når du fram!","🙂 Helt okej, men kan bli bättre!","😌 Du är på gång!","🔍 Du söker rätt område!","👍 Fortsätt öva, du kommer dit!","😅 Inte direkt på pricken!","🚀 Nästa gång skjuter du iväg!","🎈 Du var på väg!"],
+      far: ["🤔 Oj, långt ifrån den här gången!","😅 Det var en riktig långresa!","🔭 Nästa gång ser du landet tydligare!","🌍 Du hamnade i fel del av världen!","😮 Hoppsan, det blev ett äventyr!","🧭 Nästa gång hittar du rätt riktning!","🚶 Du fick promenera en bit!","🐢 Ta sats – du når fram!","🎒 Packa ner mer information till nästa gissning!","⏳ Det tog ett tag, men du lär dig!"]
+    };
 
-    let TOTAL_ROUNDS, currentRound=0, score=0, timerInterval, timeLeft;
-    let map, guessMarker, actualMarker, lineMarker, currentLocation;
+    // State
+    let difficulty = 'medium', currentRound=0, score=0, highScore= parseInt(localStorage.getItem('geoguessrHighScore')||'0');
+    let streetMap, guessMap, guessMarker, actualMarker, lineMarker, currentLocation;
 
-    const startScreen = document.getElementById('startScreen');
-    const gameContainer = document.getElementById('gameContainer');
-    const startButton = document.getElementById('startButton');
-    const regionSelect = document.getElementById('regionSelect');
-    const roundsInput = document.getElementById('roundsInput');
-    const roundInfo = document.getElementById('roundInfo');
-    const scoreInfo = document.getElementById('scoreInfo');
-    const timerEl = document.getElementById('timer');
-    const messageBox = document.getElementById('messageBox');
+    // DOM
+    const startScreen=document.getElementById('startScreen'),
+          gameContainer=document.getElementById('gameContainer'),
+          startButton=document.getElementById('startButton'),
+          difficultySelect=document.getElementById('difficulty'),
+          difficultyDesc=document.getElementById('difficultyDescription'),
+          roundInfo=document.getElementById('roundInfo'),
+          scoreInfo=document.getElementById('scoreInfo'),
+          highScoreInfo=document.getElementById('highScoreInfo'),
+          messageBox=document.getElementById('messageBox');
 
-    startButton.addEventListener('click', startGame);
+    // Beskrivningar
+    const descriptions={
+      easy:"Endast stora, välkända städer!",
+      medium:"Blandade städer för lagom utmaning.",
+      hard:"Helt slumpade platser över hela världen!"
+    };
 
-    function startGame() {
-      TOTAL_ROUNDS = parseInt(roundsInput.value) || 5;
-      currentRound = 0;
-      score = 0;
-      startScreen.style.display = 'none';
-      gameContainer.style.display = 'block';
-      initMap();
-      setTimeout(() => map.invalidateSize(), 200);
+    // Init
+    difficultyDesc.textContent=descriptions[difficulty];
+    difficultySelect.onchange=()=>{
+      difficulty=difficultySelect.value;
+      difficultyDesc.textContent=descriptions[difficulty];
+    };
+    startButton.onclick=startGame;
+
+    function startGame(){
+      startScreen.style.display='none';
+      gameContainer.style.display='block';
+      currentRound=0; score=0;
+      updateHighScore();
+      initMaps();
       nextRound();
     }
 
-    function initMap() {
-      const opts = { scrollWheelZoom: false, doubleClickZoom: false, minZoom: 2, maxZoom: 12 };
-      map = L.map('map', opts).setView([59.3293, 18.0686], 5);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
-      map.on('click', e => { if (!guessMarker) makeGuess(e.latlng); });
+    function initMaps(){
+      const opts={scrollWheelZoom:false,doubleClickZoom:false,minZoom:2,maxZoom:15};
+      streetMap=L.map('streetMap',opts).setView([59.3293,18.0686],5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(streetMap);
+      guessMap=L.map('guessMap',{scrollWheelZoom:true,zoomControl:true,minZoom:2,maxZoom:5}).setView([20,0],2);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(guessMap);
+      guessMap.on('click',e=>{ if(!guessMarker) makeGuess(e.latlng); });
     }
 
-    function nextRound() {
-      if (currentRound >= TOTAL_ROUNDS) { endGame(); return; }
-      currentRound++;
-      clearMarkers();
-      updateUI();
-      const pool = CITIES.filter(c => regionSelect.value === 'all' || c.region === regionSelect.value);
-      currentLocation = pool[Math.floor(Math.random() * pool.length)];
-      map.setView([currentLocation.lat, currentLocation.lon], 8);
-      // Visa prompt för aktuell plats
-      showMessage(`Var är ${currentLocation.name}?`, false);
-      startTimer(30);
+    function nextRound(){
+      if(currentRound>=TOTAL_ROUNDS){ endGame(); return; }
+      currentRound++; clearMarkers();
+      currentLocation=pickLocation();
+      streetMap.setView([currentLocation.lat,currentLocation.lon],getZoom());
+      roundInfo.textContent=`Runda: ${currentRound}/${TOTAL_ROUNDS}`;
+      scoreInfo.textContent=`Poäng: ${score}`;
+      showMessage(`Runda ${currentRound}: Var ligger ${currentLocation.name}?`);
     }
 
-    function startTimer(sec) {
-      clearInterval(timerInterval);
-      timeLeft = sec;
-      timerEl.textContent = `Tid: ${timeLeft}s`;
-      timerInterval = setInterval(() => {
-        timeLeft--;
-        timerEl.textContent = `Tid: ${timeLeft}s`;
-        if (timeLeft <= 0) { clearInterval(timerInterval); makeGuess(null); }
-      }, 1000);
+    function pickLocation(){
+      const pool=CITIES.filter(c=>c.region==='europe' || difficulty!=='easy');
+      return pool[Math.floor(Math.random()*pool.length)];
     }
 
-    function makeGuess(latlng) {
-      clearInterval(timerInterval);
-      const lat = latlng ? latlng.lat : currentLocation.lat;
-      const lon = latlng ? latlng.lng : currentLocation.lon;
-      guessMarker = L.marker([lat, lon]).addTo(map).getElement().classList.add('bounce');
-      actualMarker = L.marker([currentLocation.lat, currentLocation.lon]).addTo(map).getElement().classList.add('bounce');
-      lineMarker = L.polyline([[lat, lon], [currentLocation.lat, currentLocation.lon]], { color: 'red' }).addTo(map);
-      const dist = calcDist(lat, lon, currentLocation.lat, currentLocation.lon);
-      const bonus = dist < 50 ? 200 : 0;
-      const pts = Math.max(0, 1000 - Math.round(dist)) + bonus;
-      score += pts;
-      updateUI();
-      showMessage(`${Math.round(dist)} km - ${pts} p${bonus ? ' (+bonus)' : ''}`, true, () => { clearMessage(); nextRound(); });
+    function getZoom(){
+      return difficulty==='easy'?8:difficulty==='medium'?6:4;
     }
 
-    function calcDist(a, b, c, d) {
-      const R = 6371;
-      const dLat = (c - a) * Math.PI / 180;
-      const dLon = (d - b) * Math.PI / 180;
-      const a2 = Math.sin(dLat / 2)**2 + Math.cos(a * Math.PI / 180)*Math.cos(c * Math.PI / 180)*Math.sin(dLon / 2)**2;
-      const c2 = 2 * Math.atan2(Math.sqrt(a2), Math.sqrt(1 - a2));
-      return R * c2;
+    function makeGuess({lat,lng}){
+      guessMarker=L.marker([lat,lng]).addTo(guessMap);
+      actualMarker=L.marker([currentLocation.lat,currentLocation.lon]).addTo(guessMap);
+      lineMarker=L.polyline([[lat,lng],[currentLocation.lat,currentLocation.lon]],{color:'blue'}).addTo(guessMap);
+      const dist=calculateDistance(lat,lng,currentLocation.lat,currentLocation.lon);
+      const pts=Math.max(0,1000-Math.round(dist));
+      score+=pts; scoreInfo.textContent=`Poäng: ${score}`;
+      saveHighScore();
+      const category=dist<50?'close':dist<200?'good':dist<500?'meh':'far';
+      const opts=feedbackOptions[category];
+      const feedback=opts[Math.floor(Math.random()*opts.length)];
+      showMessage(`${Math.round(dist)} km – ${feedback}`,true,nextRound);
     }
 
-    function clearMarkers() { [guessMarker, actualMarker, lineMarker].forEach(m => m && m.remove()); guessMarker = actualMarker = lineMarker = null; }
-
-    function updateUI() { roundInfo.textContent = `Runda: ${currentRound}/${TOTAL_ROUNDS}`; scoreInfo.textContent = `Poäng: ${score}`; }
-
-    function showMessage(text, clickable = false, cb = null) {
-      messageBox.textContent = text;
-      messageBox.style.display = 'block';
-      if (clickable) { messageBox.onclick = () => { messageBox.style.display = 'none'; messageBox.onclick = null; cb(); }; }
-      else { setTimeout(clearMessage, 2000); }
+    function calculateDistance(la,lo,la2,lo2){
+      const R=6371,dLat=(la2-la)*Math.PI/180,dLon=(lo2-lo)*Math.PI/180;
+      const a=Math.sin(dLat/2)**2+Math.cos(la*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLon/2)**2;
+      return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
     }
 
-    function clearMessage() { messageBox.style.display = 'none'; messageBox.onclick = null; }
+    function clearMarkers(){
+      [guessMarker,actualMarker,lineMarker].forEach(m=>{if(m)guessMap.removeLayer(m)});
+      guessMarker=actualMarker=lineMarker=null;
+    }
 
-    function endGame() { showMessage(`Spelet slut! Totalpoäng: ${score}`, true, () => location.reload()); }
+    function updateHighScore(){
+      if(score>highScore){highScore=score;localStorage.setItem('geoguessrHighScore',highScore);}
+      highScoreInfo.textContent=`Rekord: ${highScore}`;
+    }
+
+    function showMessage(txt,clickable=false,cb=null){
+      messageBox.textContent=txt; messageBox.style.display='block';
+      if(clickable){ messageBox.classList.add('clickable'); messageBox.onclick=()=>{
+        messageBox.style.display='none'; messageBox.classList.remove('clickable');
+        messageBox.onclick=null; cb(); };
+      } else setTimeout(()=>messageBox.style.display='none',3000);
+    }
+
+    function endGame(){
+      showMessage(`Spelet slut! Din poäng: ${score}`,true,()=>{
+        gameContainer.style.display='none';
+        startScreen.style.display='flex';
+      });
+    }
   </script>
 </body>
 </html>
