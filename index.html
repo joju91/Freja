@@ -18,8 +18,8 @@
     .game-layout{display:flex;height:100%;}
     .map-container{flex:1;position:relative;}
     #streetMap,#guessMap{width:100%;height:100%;}
-    #textQuestion{position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);font-size:1.5rem;color:#000;display:none;}
-    .message-box{position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);background:#fff;padding:0.5rem 1rem;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,0.2);z-index:600;display:none;}
+    #textQuestion{position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);font-size:1.5rem;color:#000;display:none;background:rgba(255,255,255,0.9);padding:1rem;border-radius:8px;text-align:center;}
+    .message-box{position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);background:#fff;padding:0.5rem 1rem;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,0.2);z-index:600;display:none;cursor:pointer;}
     .bounce{animation:bounce 0.5s;}@keyframes bounce{0%{transform:scale(1);}50%{transform:scale(1.3);}100%{transform:scale(1);}}
   </style>
 </head>
@@ -60,10 +60,30 @@
   <script>
     const CITIES = [
       {name:"Stockholm, Sverige",lat:59.3293,lon:18.0686,region:"europe"},
-      // ... övriga städer ...
+      {name:"London, Storbritannien",lat:51.5074,lon:-0.1278,region:"europe"},
+      {name:"Paris, Frankrike",lat:48.8566,lon:2.3522,region:"europe"},
+      {name:"Berlin, Tyskland",lat:52.5200,lon:13.4050,region:"europe"},
+      {name:"Rom, Italien",lat:41.9028,lon:12.4964,region:"europe"},
+      {name:"Madrid, Spanien",lat:40.4168,lon:-3.7038,region:"europe"},
+      {name:"Amsterdam, Nederländerna",lat:52.3676,lon:4.9041,region:"europe"},
+      {name:"Wien, Österrike",lat:48.2082,lon:16.3738,region:"europe"},
+      {name:"Tokyo, Japan",lat:35.6762,lon:139.6503,region:"asia"},
+      {name:"Beijing, Kina",lat:39.9042,lon:116.4074,region:"asia"},
+      {name:"Mumbai, Indien",lat:19.0760,lon:72.8777,region:"asia"},
+      {name:"Seoul, Sydkorea",lat:37.5665,lon:126.9780,region:"asia"},
+      {name:"Bangkok, Thailand",lat:13.7563,lon:100.5018,region:"asia"},
+      {name:"Jakarta, Indonesien",lat:-6.2088,lon:106.8456,region:"asia"},
+      {name:"New York, USA",lat:40.7128,lon:-74.0060,region:"america"},
+      {name:"Los Angeles, USA",lat:34.0522,lon:-118.2437,region:"america"},
+      {name:"São Paulo, Brasilien",lat:-23.5505,lon:-46.6333,region:"america"},
+      {name:"Mexico City, Mexiko",lat:19.4326,lon:-99.1332,region:"america"},
+      {name:"Toronto, Kanada",lat:43.6532,lon:-79.3832,region:"america"},
+      {name:"Buenos Aires, Argentina",lat:-34.6118,lon:-58.3960,region:"america"}
     ];
+    
     let TOTAL_ROUNDS, currentRound = 0, score = 0, timerInterval, timeLeft, mode;
     let streetMap, guessMap, guessMarker, actualMarker, lineMarker, currentLocation;
+    let hasGuessed = false;
 
     const startScreen = document.getElementById('startScreen');
     const gameContainer = document.getElementById('gameContainer');
@@ -77,7 +97,9 @@
     const textQuestion = document.getElementById('textQuestion');
     const streetContainer = document.getElementById('streetContainer');
     const guessContainer = document.getElementById('guessContainer');
-    const messageBox = document.getElementById('messageBox');startButton.addEventListener('click', startGame);
+    const messageBox = document.getElementById('messageBox');
+
+    startButton.addEventListener('click', startGame);
 
     function startGame() {
       TOTAL_ROUNDS = parseInt(roundsInput.value) || 5;
@@ -86,9 +108,16 @@
       score = 0;
       startScreen.style.display = 'none';
       gameContainer.style.display = 'block';
-      // Initiera kartor alltid så guessMap finns i textläge
+      
+      // Initiera kartor
       initMaps();
-      setTimeout(() => { streetMap.invalidateSize(); guessMap.invalidateSize(); }, 200);
+      
+      // Vänta lite längre för att säkerställa att kartorna är redo
+      setTimeout(() => { 
+        if (streetMap) streetMap.invalidateSize(); 
+        if (guessMap) guessMap.invalidateSize(); 
+      }, 500);
+      
       // Visa/dölj containers enligt läge
       if (mode === 'map') {
         streetContainer.style.display = 'block';
@@ -97,40 +126,78 @@
       }
       guessContainer.style.display = 'block';
       textQuestion.style.display = (mode === 'text') ? 'block' : 'none';
+      
       nextRound();
     }
+
     function initMaps() {
-      const streetOpts = { scrollWheelZoom: false, doubleClickZoom: false, minZoom: 2, maxZoom: 12 };
-      streetMap = L.map('streetMap', streetOpts).setView([59.3293, 18.0686], 5);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        { attribution: '© OpenStreetMap contributors' }
-      ).addTo(streetMap);
+      try {
+        const streetOpts = { 
+          scrollWheelZoom: false, 
+          doubleClickZoom: false, 
+          minZoom: 2, 
+          maxZoom: 18 
+        };
+        streetMap = L.map('streetMap', streetOpts).setView([59.3293, 18.0686], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          { attribution: '© OpenStreetMap contributors' }
+        ).addTo(streetMap);
 
-      const guessOpts = { scrollWheelZoom: true, doubleClickZoom: true, zoomControl: true, minZoom: 2, maxZoom: 5 };
-      guessMap = L.map('guessMap', guessOpts).setView([20, 0], 2);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        { attribution: '© OpenStreetMap contributors' }
-      ).addTo(guessMap);
+        const guessOpts = { 
+          scrollWheelZoom: true, 
+          doubleClickZoom: true, 
+          zoomControl: true, 
+          minZoom: 2, 
+          maxZoom: 8 
+        };
+        guessMap = L.map('guessMap', guessOpts).setView([20, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          { attribution: '© OpenStreetMap contributors' }
+        ).addTo(guessMap);
 
-      guessMap.on('click', e => { if (!guessMarker) makeGuess(e.latlng); });
+        guessMap.on('click', e => { 
+          if (!hasGuessed) {
+            makeGuess(e.latlng); 
+          }
+        });
+      } catch (error) {
+        console.error('Error initializing maps:', error);
+        showMessage('Fel vid laddning av kartor. Försök igen.', true, () => location.reload());
+      }
     }
 
     function nextRound() {
-      if (currentRound >= TOTAL_ROUNDS) { endGame(); return; }
+      if (currentRound >= TOTAL_ROUNDS) { 
+        endGame(); 
+        return; 
+      }
+      
       currentRound++;
+      hasGuessed = false;
       clearMarkers();
       updateUI();
+      
       const pool = CITIES.filter(c => regionSelect.value === 'all' || c.region === regionSelect.value);
+      
+      if (pool.length === 0) {
+        showMessage('Inga städer tillgängliga för vald region.', true, () => location.reload());
+        return;
+      }
+      
       currentLocation = pool[Math.floor(Math.random() * pool.length)];
-
       startTimer(30);
 
       if (mode === 'map') {
         streetContainer.style.display = 'block';
         guessContainer.style.display = 'block';
         textQuestion.style.display = 'none';
-        streetMap.setView([currentLocation.lat, currentLocation.lon], 8);
-        guessMap.setView([20, 0], 2);
+        
+        if (streetMap) {
+          streetMap.setView([currentLocation.lat, currentLocation.lon], 8);
+        }
+        if (guessMap) {
+          guessMap.setView([20, 0], 2);
+        }
         showMessage(`Var är ${currentLocation.name}?`, false);
       } else {
         streetContainer.style.display = 'none';
@@ -149,41 +216,70 @@
         timerEl.textContent = `Tid: ${timeLeft}s`;
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
-          if (mode === 'map') makeGuess(null);
-          else nextRound();
+          if (!hasGuessed) {
+            // Tid ute - använd faktisk position som "gissning"
+            makeGuess({lat: currentLocation.lat, lng: currentLocation.lon}, true);
+          }
         }
       }, 1000);
     }
 
-    function makeGuess(latlng) {
+    function makeGuess(latlng, timeOut = false) {
+      if (hasGuessed) return;
+      
+      hasGuessed = true;
       clearInterval(timerInterval);
+      
       const lat = latlng ? latlng.lat : currentLocation.lat;
       const lon = latlng ? latlng.lng : currentLocation.lon;
-      guessMarker = L.marker([lat, lon]).addTo(guessMap).getElement().classList.add('bounce');
-      actualMarker = L.marker([currentLocation.lat, currentLocation.lon]).addTo(guessMap).getElement().classList.add('bounce');
+      
+      // Skapa markörer korrekt
+      guessMarker = L.marker([lat, lon]).addTo(guessMap);
+      actualMarker = L.marker([currentLocation.lat, currentLocation.lon]).addTo(guessMap);
+      
+      // Lägg till bounce-animation
+      setTimeout(() => {
+        if (guessMarker.getElement()) guessMarker.getElement().classList.add('bounce');
+        if (actualMarker.getElement()) actualMarker.getElement().classList.add('bounce');
+      }, 100);
+      
       lineMarker = L.polyline([[lat, lon], [currentLocation.lat, currentLocation.lon]], { color: 'red' }).addTo(guessMap);
+      
       const dist = calcDist(lat, lon, currentLocation.lat, currentLocation.lon);
       const bonus = dist < 50 ? 200 : 0;
-      const pts = Math.max(0, 1000 - Math.round(dist)) + bonus;
+      const pts = timeOut ? 0 : Math.max(0, 1000 - Math.round(dist)) + bonus;
       score += pts;
       updateUI();
 
       // Expanded feedback options
       const feedbackOptions = {
+        timeout: ["Tiden tog slut! ⏰", "För långsamt denna gång! ⏱️"],
         close: ["Snyggt! Nära inpå! 🎯", "Imponerande träff! 🌟", "Du är på pricken! ✅"],
         good: ["Bra gissat! 👍", "Bra där! 👏", "Fin gissning! 😊"],
         meh: ["Inte riktigt nära, men bra försök! 👌", "Inte illa, men lite långt bort. 🤔", "Du kom ganska nära! 😉"],
         far: ["Oj, långt ifrån denna gång. 🤔", "Det var långt bort! 😅", "Nästa gång är du närmare! 🔍"]
       };
+      
       let feedbackArray;
-      if (dist < 50) feedbackArray = feedbackOptions.close;
-      else if (dist < 200) feedbackArray = feedbackOptions.good;
-      else if (dist < 500) feedbackArray = feedbackOptions.meh;
-      else feedbackArray = feedbackOptions.far;
+      if (timeOut) {
+        feedbackArray = feedbackOptions.timeout;
+      } else if (dist < 50) {
+        feedbackArray = feedbackOptions.close;
+      } else if (dist < 200) {
+        feedbackArray = feedbackOptions.good;
+      } else if (dist < 500) {
+        feedbackArray = feedbackOptions.meh;
+      } else {
+        feedbackArray = feedbackOptions.far;
+      }
+      
       const feedback = feedbackArray[Math.floor(Math.random() * feedbackArray.length)];
-
       const message = `${Math.round(dist)} km - ${pts} p${bonus ? ' (+bonus)' : ''}. ${feedback}`;
-      showMessage(message, true, () => { clearMessage(); nextRound(); });
+      
+      showMessage(message, true, () => { 
+        clearMessage(); 
+        setTimeout(nextRound, 500); 
+      });
     }
 
     function calcDist(a, b, c, d) {
@@ -195,11 +291,50 @@
       return R * c2;
     }
 
-    function clearMarkers() { [guessMarker, actualMarker, lineMarker].forEach(m => m && m.remove()); guessMarker = actualMarker = lineMarker = null; }
-    function updateUI() { roundInfo.textContent = `Runda: ${currentRound}/${TOTAL_ROUNDS}`; scoreInfo.textContent = `Poäng: ${score}`; }
-    function showMessage(text, clickable = false, cb = null) { messageBox.textContent = text; messageBox.style.display = 'block'; if (clickable) { messageBox.onclick = () => { messageBox.style.display = 'none'; messageBox.onclick = null; cb(); }; } else { setTimeout(clearMessage, 2000); } }
-    function clearMessage() { messageBox.style.display = 'none'; messageBox.onclick = null; }
-    function endGame() { showMessage(`Spelet slut! Totalpoäng: ${score}`, true, () => location.reload()); }
+    function clearMarkers() { 
+      if (guessMarker) {
+        guessMap.removeLayer(guessMarker);
+        guessMarker = null;
+      }
+      if (actualMarker) {
+        guessMap.removeLayer(actualMarker);
+        actualMarker = null;
+      }
+      if (lineMarker) {
+        guessMap.removeLayer(lineMarker);
+        lineMarker = null;
+      }
+    }
+
+    function updateUI() { 
+      roundInfo.textContent = `Runda: ${currentRound}/${TOTAL_ROUNDS}`; 
+      scoreInfo.textContent = `Poäng: ${score}`; 
+    }
+
+    function showMessage(text, clickable = false, cb = null) { 
+      messageBox.textContent = text; 
+      messageBox.style.display = 'block'; 
+      if (clickable) { 
+        messageBox.style.cursor = 'pointer';
+        messageBox.onclick = () => { 
+          messageBox.style.display = 'none'; 
+          messageBox.onclick = null; 
+          if (cb) cb(); 
+        }; 
+      } else { 
+        messageBox.style.cursor = 'default';
+        setTimeout(clearMessage, 2000); 
+      } 
+    }
+
+    function clearMessage() { 
+      messageBox.style.display = 'none'; 
+      messageBox.onclick = null; 
+    }
+
+    function endGame() { 
+      showMessage(`Spelet slut! Totalpoäng: ${score}/${TOTAL_ROUNDS * 1000}`, true, () => location.reload()); 
+    }
   </script>
 </body>
 </html>
